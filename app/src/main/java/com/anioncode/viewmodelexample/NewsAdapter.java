@@ -5,10 +5,12 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -25,9 +27,16 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.HeroViewHolder
     Context mCtx;
     List<ModelNews> heroList;
 
-    public NewsAdapter(Context mCtx, List<ModelNews> heroList) {
+    ShowDialoginterface showDialoginterface;
+
+    interface  ShowDialoginterface{
+       void itemClik(ModelNews hero);
+    }
+
+    public NewsAdapter(Context mCtx, List<ModelNews> heroList,ShowDialoginterface showDialoginterface) {
         this.mCtx = mCtx;
         this.heroList = heroList;
+        this.showDialoginterface = showDialoginterface;
 
     }
 
@@ -69,6 +78,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.HeroViewHolder
             System.out.println(hero.getDate());
         }
 
+        holder.itemView.setOnClickListener(v->{
+            showDialoginterface.itemClik(hero);
+        });
 
 
 

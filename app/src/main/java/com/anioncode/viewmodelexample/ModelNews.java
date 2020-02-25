@@ -4,12 +4,22 @@ public class ModelNews {
 
     String title ;
     String thumbnail;
+    String embed;
     String date;
 
-    public ModelNews(String title, String thumbnail, String date) {
+    public ModelNews(String title, String thumbnail, String embed, String date) {
         this.title = title;
         this.thumbnail = thumbnail;
+        this.embed = embed;
         this.date = date;
+    }
+
+    public String getEmbed() {
+        return embed;
+    }
+
+    public void setEmbed(String embed) {
+        this.embed = embed;
     }
 
     public String getTitle() {

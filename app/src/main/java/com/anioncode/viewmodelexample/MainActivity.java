@@ -1,6 +1,7 @@
 package com.anioncode.viewmodelexample;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -10,6 +11,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.Button;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -55,7 +61,27 @@ public class MainActivity extends AppCompatActivity {
         model.getHeroes().observe(this, new Observer<List<ModelNews>>() {
             @Override
             public void onChanged(@Nullable List<ModelNews> heroList) {
-                adapter = new NewsAdapter(MainActivity.this, heroList);
+                adapter = new NewsAdapter(MainActivity.this, heroList,hero -> {
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+
+                    LayoutInflater inflater =  getLayoutInflater();
+                    View dialogView = inflater.inflate(R.layout.web_show, null);
+                    dialogBuilder.setView(dialogView);
+
+                    WebView mWebView=(WebView)dialogView.findViewById(R.id.WebConnect);
+                    Button button=dialogView.findViewById(R.id.ok);
+
+                    WebSettings webSettings = mWebView.getSettings();
+                    webSettings.setJavaScriptEnabled(true);
+
+
+
+                    mWebView.loadData(hero.getEmbed(), "text/html", "UTF-8");
+
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    button.setOnClickListener(view -> {alertDialog.dismiss();});
+                    alertDialog.show();
+                });
                // model.loadHeroes();
                 NewsRecycler.setAdapter(adapter);
             }
@@ -108,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     String title = "";
                     String thumbnail = "";
                     String date = "";
+                    String embed = "";
 
                     try {
                         JSONArray json = new JSONArray(responseData);
@@ -115,8 +142,9 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject jsons = json.getJSONObject(i);
                             title = jsons.getString("title");
                             thumbnail = jsons.getString("thumbnail");
+                            embed = jsons.getString("embed");
                             date = jsons.getString("date");
-                            datas.add(new ModelNews(title, thumbnail, date));
+                            datas.add(new ModelNews(title, thumbnail,embed, date));
 
                         }
                         runOnUiThread(new Runnable() {
