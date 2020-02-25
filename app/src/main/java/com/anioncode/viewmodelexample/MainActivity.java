@@ -11,10 +11,20 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.os.StrictMode;
 
-import com.anioncode.viewmodelexample.ApiConnect.ModelNews;
-import com.anioncode.viewmodelexample.ApiConnect.ReturnResponse;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -32,29 +42,30 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+
+
         swipeRefreshLayoutNews = findViewById(R.id.swipe_layout);
         swipeRefreshLayoutNews.setRefreshing(true);
         NewsRecycler = findViewById(R.id.NewsRecycler);
         NewsRecycler.setHasFixedSize(true);
         NewsRecycler.setLayoutManager(new LinearLayoutManager(this));
+
         model = ViewModelProviders.of(this).get(NewsViewModel.class);
 
         model.getHeroes().observe(this, new Observer<List<ModelNews>>() {
             @Override
             public void onChanged(@Nullable List<ModelNews> heroList) {
                 adapter = new NewsAdapter(MainActivity.this, heroList);
-
-//        ReturnResponse response=new ReturnResponse();
-//        response.requestInit();
-//        response.getDataApi();
+               // model.loadHeroes();
+                NewsRecycler.setAdapter(adapter);
             }
         });
-
+          addDAta();
         swipeRefreshLayoutNews.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 swipeRefreshLayoutNews.setRefreshing(true);
-                model.loadHeroes();
+                addDAta();
             }
         });
         swipeRefreshLayoutNews.post(new Runnable() {
@@ -64,9 +75,73 @@ public class MainActivity extends AppCompatActivity {
 
                 swipeRefreshLayoutNews.setRefreshing(true);
 
-                model.loadHeroes();
+                addDAta();
             }
         });
         NewsRecycler.setAdapter(adapter);
     }
+    ArrayList<ModelNews> datas = new ArrayList<>();
+    private void addDAta() {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://free-football-soccer-videos.p.rapidapi.com/")
+                .get()
+                .addHeader("x-rapidapi-host", "free-football-soccer-videos.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", "4877c410b9mshe7fe9517ac14094p1cd13ejsn6a566299c797")
+                .build();
+
+
+        try {
+
+            Response response = client.newCall(request).execute();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    String responseData = response.body().string();
+                    //System.out.println(responseData);
+                    String title = "";
+                    String thumbnail = "";
+                    String date = "";
+
+                    try {
+                        JSONArray json = new JSONArray(responseData);
+                        for (int i = 0; i < json.length(); i++) {
+                            JSONObject jsons = json.getJSONObject(i);
+                            title = jsons.getString("title");
+                            thumbnail = jsons.getString("thumbnail");
+                            date = jsons.getString("date");
+                            datas.add(new ModelNews(title, thumbnail, date));
+
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                model.SetItem(datas);
+                                swipeRefreshLayoutNews.setRefreshing(false);
+                            }
+                        });
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }finally {
+                        response.close();
+
+
+                    }
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

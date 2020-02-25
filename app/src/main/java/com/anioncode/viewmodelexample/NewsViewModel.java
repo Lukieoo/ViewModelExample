@@ -4,18 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.anioncode.viewmodelexample.ApiConnect.ModelNews;
-import com.anioncode.viewmodelexample.ApiConnect.ReturnResponse;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.anioncode.viewmodelexample.MainActivity.swipeRefreshLayoutNews;
-
 public class NewsViewModel extends ViewModel {
 
+
     //this is the data that we will fetch asynchronously
-    private MutableLiveData<List<ModelNews>> ItemList;
+    public   MutableLiveData<List<ModelNews>> ItemList;
     private ArrayList<ModelNews> datas = new ArrayList<>();
 
     //we will call this method to get the data
@@ -24,7 +20,7 @@ public class NewsViewModel extends ViewModel {
         if (ItemList == null) {
             ItemList = new MutableLiveData<List<ModelNews>>();
             //we will load it asynchronously from server in this method
-            loadHeroes();
+           // loadHeroes();
         }
 
         //finally we will return the list
@@ -39,19 +35,11 @@ public class NewsViewModel extends ViewModel {
     }
 
     //This method is using Retrofit to get the JSON data from URL
-    public void loadHeroes() {
+    public void SetItem(List<ModelNews> datas2) {
+        //if the list is null
 
-
-                swipeRefreshLayoutNews.setRefreshing(false);
-
-                ReturnResponse response = new ReturnResponse();
-
-                response.requestInit();
-
-                datas = response.getDataApi();
-
-
-
+        ItemList.setValue(datas2);
+        //finally we will return the list
 
     }
 }

@@ -1,4 +1,4 @@
-package com.anioncode.viewmodelexample.ApiConnect;
+package com.anioncode.viewmodelexample;
 
 public class ModelNews {
 
